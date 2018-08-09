@@ -697,7 +697,7 @@ class Item extends Model
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Last-Modified: ' . gmdate('D, d M Y H:i:s', time()) . ' GMT');
         header('Cache-Control: private', false);
-        header('Content-Type: application/force-download');
+        header('Content-Type: image/jpeg');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Content-Transfer-Encoding: binary');
         header('Content-Length: ' . strlen($r)); // provide file size
