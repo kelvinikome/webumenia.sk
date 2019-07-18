@@ -74,7 +74,7 @@ return array(
     */
 
     'key' => env('APP_KEY'),
-    'cipher' => MCRYPT_RIJNDAEL_128,
+    'cipher' => 'AES-128-CBC',
 
     /*
     |--------------------------------------------------------------------------
@@ -107,7 +107,6 @@ return array(
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         'Former\FormerServiceProvider',
-        'Fadion\Bouncy\BouncyServiceProvider',
         'Maatwebsite\Excel\ExcelServiceProvider',
         'Conner\Tagging\Providers\TaggingServiceProvider',
         'Rap2hpoutre\LaravelLogViewer\LaravelLogViewerServiceProvider',
@@ -129,7 +128,6 @@ return array(
         'GrahamCampbell\Throttle\ThrottleServiceProvider',
         Mcamara\LaravelLocalization\LaravelLocalizationServiceProvider::class,
         Dimsav\Translatable\TranslatableServiceProvider::class,
-        Sentry\SentryLaravel\SentryLaravelServiceProvider::class,
 
         /*
          * Application Service Providers...

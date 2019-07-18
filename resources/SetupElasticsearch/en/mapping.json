@@ -15,7 +15,7 @@
         },
         "stemmed": {
           "type": "text",
-          "analyzer": "english"
+          "analyzer": "default_analyzer"
         },
         "suggest": {
           "type": "text",
@@ -33,7 +33,7 @@
         },
         "stemmed": {
           "type": "text",
-          "analyzer": "english"
+          "analyzer": "default_analyzer"
         },
         "suggest": {
           "type": "text",
@@ -48,7 +48,7 @@
       "fields": {
         "stemmed": {
           "type": "text",
-          "analyzer": "english"
+          "analyzer": "default_analyzer"
         }
       }
     },
@@ -87,7 +87,7 @@
         },
         "stemmed": {
           "type": "text",
-          "analyzer": "english"
+          "analyzer": "default_analyzer"
         }
       }
     },

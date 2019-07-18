@@ -13,10 +13,11 @@
 
 use App\Article;
 use App\Collection;
-use App\Item;
-use App\Slide;
-use App\Order;
 use App\Color;
+use App\Item;
+use App\Order;
+use App\Repositories\ItemRepository;
+use App\Slide;
 
 Route::group(['domain' => 'media.webumenia.{tld}'], function () {
     Route::get('/', function ($tld) {
@@ -41,7 +42,7 @@ function()
         return redirect('kolekcia/25');
     });
 
-    Route::get('/', function () {
+    Route::get('/', function (ItemRepository $itemRepository) {
 
         $slides = Slide::published()->orderBy('id', 'desc')->get();
         $articles = Article::promoted()->published()->orderBy('published_date', 'desc')->get();
@@ -49,6 +50,7 @@ function()
         return view('intro', [
             'slides' => $slides,
             'articles' => $articles,
+            'itemCount' => $itemRepository->count(),
         ]);
     });
 
@@ -218,7 +220,7 @@ function()
         if (Input::has('collection')) {
             $collection = Collection::find((int) Input::get('collection'));
             if (!empty($collection)) {
-                $items = $collection->items->lists('id')->all();
+                $items = $collection->items->pluck('id')->all();
                 $previousId = getPrevVal($items, $id);
                 if ($previousId) {
                     $previous = Item::find($previousId)->getUrl(['collection' => $collection->id]);
@@ -279,11 +281,11 @@ function()
 
     Route::get('dielo/nahlad/{id}/{width}/{height?}', 'ImageController@resize')->where('width', '[0-9]+')->where('height', '[0-9]+')->name('dielo.nahlad');
 
-    Route::controller('patternlib', 'PatternlibController');
+    Route::get('patternlib', 'PatternlibController@getIndex');
 
-    Route::controller('katalog', 'CatalogController', [
-        'getIndex' => 'catalog.index'
-    ]);
+    Route::get('katalog', 'CatalogController@getIndex')->name('catalog.index');
+//    Route::get('katalog', 'CatalogController@getSuggestions')->name('catalog.suggestions');
+//    Route::get('katalog', 'CatalogController@getRandom')->name('catalog.random');
     // Route::match(array('GET', 'POST'), 'katalog', 'CatalogController@index');
     // Route::match(array('GET', 'POST'), 'katalog/suggestions', 'CatalogController@getSuggestions');
 

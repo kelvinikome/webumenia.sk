@@ -9,11 +9,11 @@ function getLocalizedURLArray($removeQueryString = false)
     $localizedURLs = array();
     foreach ($localesOrdered as $localeCode => $properties) {
         $url = LaravelLocalization::getLocalizedURL($localeCode, null, [], true);
-        if ($removeQueryString) {
-            $parsedUrl = parse_url($url);
-            unset($parsedUrl['query']);
-            $url = \Guzzle\Http\Url::buildUrl($parsedUrl);
-        }
+//        if ($removeQueryString) {
+//            $parsedUrl = parse_url($url);
+//            unset($parsedUrl['query']);
+//            $url = \Guzzle\Http\Url::buildUrl($parsedUrl);
+//        }
         $localizedURLs[$localeCode] = $url;
     }
     return $localizedURLs;

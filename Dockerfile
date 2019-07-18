@@ -1,4 +1,4 @@
-FROM php:5.6-fpm
+FROM php:7.2-fpm
 
 RUN apt-get update -y && apt-get install -y \
     git \
@@ -8,10 +8,11 @@ RUN apt-get update -y && apt-get install -y \
     git
 
 RUN docker-php-ext-configure gd --with-jpeg-dir=/usr/include/ \
+    && pecl install mcrypt-1.0.1 \
+    && docker-php-ext-enable mcrypt \
     && docker-php-ext-install \
     pdo_mysql \
     gd \
-    mcrypt \
     zip \
     exif
 

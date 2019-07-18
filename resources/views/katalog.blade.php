@@ -3,7 +3,7 @@
 @section('title')
 
     @if (!empty($search))
-        {{ trans('katalog.title_searched') }} "{!!$search!!}"
+        {{ trans('katalog.title_searched') }} "{!! $search !!}"
     @else
         {!! getTitleWithFilters('App\Item', $input, ' | ') !!}
         {{ trans('katalog.title') }}
@@ -26,22 +26,22 @@
             <div class="row">
                 <!-- <h3>Filter: </h3> -->
                 <div  class="col-md-4 col-xs-6 bottom-space">
-                        {!! Form::select('author', array('' => '') + $authors, @$input['author'], array('class'=> 'custom-select form-control', 'data-placeholder' => trans('katalog.filters_author'))) !!}
+                        {!! Form::select('author', array('' => '') + $lists['author'], @$input['author'], array('class'=> 'custom-select form-control', 'data-placeholder' => trans('katalog.filters_author'))) !!}
                  </div>
                 <div  class="col-md-4 col-xs-6 bottom-space">
-                        {!! Form::select('work_type', array('' => '') + $work_types,  @$input['work_type'], array('class'=> 'custom-select form-control', 'data-placeholder' => trans('katalog.filters_work_type'))) !!}
+                        {!! Form::select('work_type', array('' => '') + $lists['work_type'], @$input['work_type'], array('class'=> 'custom-select form-control', 'data-placeholder' => trans('katalog.filters_work_type'))) !!}
                 </div>
                 <div  class="col-md-4 col-xs-6 bottom-space">
-                        {!! Form::select('tag', array('' => '') + $tags, @$input['tag'], array('class'=> 'custom-select form-control', 'data-placeholder' => trans('katalog.filters_tag'))) !!}
+                        {!! Form::select('tag', array('' => '') + $lists['tag'], @$input['tag'], array('class'=> 'custom-select form-control', 'data-placeholder' => trans('katalog.filters_tag'))) !!}
                 </div>
                 <div  class="col-md-4 col-xs-6 bottom-space">
-                        {!! Form::select('gallery', array('' => '') + $galleries, @$input['gallery'], array('class'=> 'custom-select form-control', 'data-placeholder' => trans('katalog.filters_gallery'))) !!}
+                        {!! Form::select('gallery', array('' => '') + $lists['gallery'], @$input['gallery'], array('class'=> 'custom-select form-control', 'data-placeholder' => trans('katalog.filters_gallery'))) !!}
                 </div>
                 <div  class="col-md-4 col-xs-6 bottom-space">
-                        {!! Form::select('topic', array('' => '') + $topics, @$input['topic'], array('class'=> 'custom-select form-control', 'data-placeholder' => trans('katalog.filters_topic'))) !!}
+                        {!! Form::select('topic', array('' => '') + $lists['topic'], @$input['topic'], array('class'=> 'custom-select form-control', 'data-placeholder' => trans('katalog.filters_topic'))) !!}
                 </div>
                 <div  class="col-md-4 col-xs-6 bottom-space">
-                        {!! Form::select('technique', array('' => '') + $techniques, @$input['technique'], array('class'=> 'custom-select form-control', 'data-placeholder' => trans('katalog.filters_technique'))) !!}
+                        {!! Form::select('technique', array('' => '') + $lists['technique'], @$input['technique'], array('class'=> 'custom-select form-control', 'data-placeholder' => trans('katalog.filters_technique'))) !!}
                 </div>
                 <div class="col-md-4 col-xs-6">
                         <div class="checkbox">
@@ -113,16 +113,16 @@
             <div class="row content-section">
             	<div class="col-xs-6">
                     @if (!empty($search))
-                        <h4 class="inline">{{ utrans('katalog.catalog_found_artworks') }} &bdquo;{!! $search !!}&ldquo; (<span data-searchd-total-hits>{!! $items->total()['value'] !!}</span>) </h4>
+                        <h4 class="inline">{{ utrans('katalog.catalog_found_artworks') }} &bdquo;{{ $search }}&ldquo; (<span data-searchd-total-hits>{{ formatNum($itemCount) }}</span>) </h4>
                     @else
-                		<h4 class="inline">{!! $items->total()['value'] !!} {{ trans('katalog.catalog_artworks') }} </h4>
+                		<h4 class="inline">{{ formatNum($itemCount) }} {{ trans('katalog.catalog_artworks') }} </h4>
                     @endif
                     @if ($items->count() == 0)
                         <p class="text-center">{{ utrans('katalog.catalog_no_artworks') }}</p>
                     @endif
 
                     @if (count(Input::all()) > 0)
-                        <a class="btn btn-sm btn-default btn-outline  sans" href="{!! URL::to('katalog')!!}">{{ trans('general.clear_filters') }}  <i class="icon-cross"></i></a>
+                        <a class="btn btn-sm btn-default btn-outline  sans" href="{{ URL::to('katalog') }}">{{ trans('general.clear_filters') }}  <i class="icon-cross"></i></a>
                     @endif
                 </div>
                 <div class="col-xs-6 text-right">

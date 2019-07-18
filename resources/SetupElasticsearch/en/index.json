@@ -7,7 +7,7 @@
           "min_gram": 2,
           "max_gram": 20
         },
-        "synonym_filter_en": {
+        "synonym_filter": {
           "type": "synonym",
           "format": "wordnet",
           "synonyms_path": "synonyms/wn_s.pl",
@@ -27,12 +27,21 @@
         }
       },
       "analyzer": {
-        "english_synonyms": {
+        "default_analyzer": {
+          "tokenizer": "standard",
+          "filter": [
+            "english_possessive_stemmer",
+            "lowercase",
+            "english_stop",
+            "english_stemmer"
+          ]
+        },
+        "synonyms_analyzer": {
           "tokenizer":  "standard",
           "filter": [
             "english_possessive_stemmer",
             "lowercase",
-            "synonym_filter_en",
+            "synonym_filter",
             "english_stop",
             "english_stemmer"
           ]

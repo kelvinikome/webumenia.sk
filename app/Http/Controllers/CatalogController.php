@@ -3,18 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Color;
-use Illuminate\Support\Facades\Input;
 use App\Item;
+use App\Repositories\ItemRepository;
+use App\SearchQuery;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\DB;
-use Fadion\Bouncy\Facades\Elastic;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Response;
 
-use Illuminate\Pagination\Paginator;
-use Illuminate\Pagination\LengthAwarePaginator;
-
-class CatalogController extends ElasticController
+class CatalogController extends Controller
 {
+    protected $itemRepository;
+
+    public function __construct(ItemRepository $itemRepository) {
+        $this->itemRepository = $itemRepository;
+    }
+
     protected function resolveSortOptions() {
         $sortables = Item::getSortables();
 
@@ -83,71 +89,61 @@ class CatalogController extends ElasticController
         }
         $offset = ($page * $per_page) - $per_page;
 
-        $params = array();
-        $params['from'] = $offset;
-        $params['size'] = $per_page;
-
         $sortOptions = $this->resolveSortOptions();
         $sortKey = $this->resolveSortKey($sortOptions);
         $sortParams = $this->resolveSortParams($sortKey);
-        $params['sort'] = $sortParams;
 
-        if (!empty($input)) {
-            if (Input::has('search')) {
-                $search = str_to_alphanumeric($search);
+        if (Input::has('search')) {
+            $search = str_to_alphanumeric($search);
 
-                $should_match = [
-                    'identifier' => [
-                        'query' => $search,
-                        'boost' => 10,
-                    ],
-                    'author.folded' => [
-                        'query' => $search,
-                        'boost' => 5,
-                    ],
-                    'title' => $search,
-                    'title.folded' => $search,
-                    'title.stemmed' => $search,
-                    'title.stemmed' => [
-                        'query' => $search,
-                        'analyzer' => $this->elastic_translatable->getAnalyzerNameForSynonyms(),
-                    ],
-                    'tag.folded' => $search,
-                    'tag.stemmed' => $search,
-                    'place.folded' => $search,
-                    'description' =>  $search,
-                    'description.stemmed' => [
-                        'query' => $search,
-                        'boost' => 0.9,
-                    ],
-                    'description.stemmed' => [
-                        'query' => $search,
-                        'analyzer' => $this->elastic_translatable->getAnalyzerNameForSynonyms(),
-                        'boost' => 0.5,
-                    ],
-                ];
+            $should_match = [
+                'identifier' => [
+                    'query' => $search,
+                    'boost' => 10,
+                ],
+                'author.folded' => [
+                    'query' => $search,
+                    'boost' => 5,
+                ],
+                'title' => $search,
+                'title.folded' => $search,
+                'title.stemmed' => [
+                    'query' => $search,
+//                    'analyzer' => $this->elastic_translatable->getAnalyzerNameForSynonyms(),
+                    'analyzer' => 'synonyms_analyzer'
+                ],
+                'tag.folded' => $search,
+                'tag.stemmed' => $search,
+                'place.folded' => $search,
+                'description' =>  $search,
+                'description.stemmed' => [
+                    'query' => $search,
+//                    'analyzer' => $this->elastic_translatable->getAnalyzerNameForSynonyms(),
+                    'analyzer' => 'synonyms_analyzer',
+                    'boost' => 0.5,
+                ],
+            ];
 
-                $should = [];
-                foreach ($should_match as $key => $match) {
-                    $should[] = ['match' => [$key => $match]];
-                }
-
-                $params['query']['bool']['should'] = $should;
-                $params['query']['bool']['minimum_should_match'] = 1;
+            $should = [];
+            foreach ($should_match as $key => $match) {
+                $should[] = ['match' => [$key => $match]];
             }
 
-            $filter = array_filter($input, function ($value, $name) {
-                return in_array($name, Item::$filterable) && !empty($value);
-            }, ARRAY_FILTER_USE_BOTH);
+            $params['query']['bool']['should'] = $should;
+            $params['query']['bool']['minimum_should_match'] = 1;
+        }
 
-            $params['query']['bool']['filter'] = Item::getFilterParams($filter);
-            if (!empty($input['year-range']) &&
-                $input['year-range'] != Item::sliderMin().','.Item::sliderMax() //nezmenena hodnota
-            ) {
-                $range = explode(',', $input['year-range']);
-                $params['query']['bool']['filter']['and'][]['range']['date_earliest']['gte'] = (isset($range[0])) ? $range[0] : Item::sliderMin();
-                $params['query']['bool']['filter']['and'][]['range']['date_latest']['lte'] = (isset($range[1])) ? $range[1] : Item::sliderMax();
-            }
+        $filter = array_filter($input, function ($value, $name) {
+            return in_array($name, Item::$filterable) && !empty($value);
+        }, ARRAY_FILTER_USE_BOTH);
+
+        $params['query']['bool']['filter'] = Item::getFilterParams($filter);
+        if (!empty($input['year-range']) &&
+            $input['year-range'] != Item::sliderMin().','.Item::sliderMax() //nezmenena hodnota
+        ) {
+            $range = explode(',', $input['year-range']);
+            $params['query']['bool']['filter']['and'][]['range']['date_earliest']['gte'] = (isset($range[0])) ? $range[0] : Item::sliderMin();
+            $params['query']['bool']['filter']['and'][]['range']['date_latest']['lte'] = (isset($range[1])) ? $range[1] : Item::sliderMax();
         }
 
         if (Input::has('color')) {
@@ -180,59 +176,61 @@ class CatalogController extends ElasticController
             $color = false;
         }
 
-        $items = Item::search($params);
+        $response = $this->itemRepository->search($offset, $per_page, [], $sortParams);
         $path   = '/' . \Request::path();
 
-        $paginator = new LengthAwarePaginator($items->all(), $items->total()['value'], $per_page, $page, ['path' => $path]);
+        $paginator = new LengthAwarePaginator($response->getCollection()->all(), $response->getTotal(), $per_page, $page, ['path' => $path]);
 
-        $authors = Item::listValues('author', $params);
-        $work_types = Item::listValues('work_type', $params);
-        $tags = Item::listValues('tag', $params);
-        $galleries = Item::listValues('gallery', $params);
-        $topics = Item::listValues('topic', $params);
-        $techniques = Item::listValues('technique', $params);
+        $query = new SearchQuery();
+        $attributes = ['author', 'work_type', 'tag', 'gallery', 'topic', 'technique'];
+        $lists = [];
+        foreach ($attributes as $attribute) {
+            $buckets = $this->itemRepository->listValues($attribute, $query);
 
-        $queries = DB::getQueryLog();
-        $last_query = end($queries);
+            $list = [];
+            foreach ($buckets as $bucket) {
+                $key = $bucket['key'];
+                if ($attribute == 'author') {
+                    $key = preg_replace('/^([^,]*),\s*(.*)$/', '$2 $1', $key);
+                }
+                $list[$bucket['key']] = sprintf('%s (%d)', $key, $bucket['doc_count']);
+            }
 
-        return view('katalog', array(
-            'items' => $items,
-            'authors' => $authors,
-            'work_types' => $work_types,
-            'tags' => $tags,
-            'galleries' => $galleries,
-            'topics' => $topics,
-            'techniques' => $techniques,
+            $lists[$attribute] = $list;
+        }
+
+        return view('katalog', [
+            'items' => $response->getCollection(),
+            'itemCount' => $response->getTotal(),
+            'lists' => $lists,
             'color' => $color,
             'search' => $search,
             'sort_by' => $sortKey,
             'sort_options' => $sortOptions,
             'input' => $input,
             'paginator' => $paginator,
-            ));
+        ]);
     }
 
     public function getSuggestions()
     {
         $q = (Input::has('search')) ? str_to_alphanumeric(Input::get('search')) : 'null';
 
-        $result = Elastic::search([
-                'index' => Config::get('bouncy.index'),
-                'type' => Item::ES_TYPE,
-                'body' => array(
-                    'query' => array(
-                        'multi_match' => array(
-                            'query' => $q,
-                            'type' => 'cross_fields',
-                            // 'fuzziness' =>  2,
-                            // 'slop'		=>  2,
-                            'fields' => array('identifier', 'title.suggest', 'author.suggest'),
-                            'operator' => 'and',
-                        ),
+        $result = $this->itemRepository->search([
+            'body' => array(
+                'query' => array(
+                    'multi_match' => array(
+                        'query' => $q,
+                        'type' => 'cross_fields',
+                        // 'fuzziness' =>  2,
+                        // 'slop'		=>  2,
+                        'fields' => array('identifier', 'title.suggest', 'author.suggest'),
+                        'operator' => 'and',
                     ),
-                    'size' => '10',
                 ),
-            ]);
+                'size' => '10',
+            ),
+        ]);
 
         $data = array();
         $data['results'] = array();
@@ -260,7 +258,7 @@ class CatalogController extends ElasticController
 
     public function getRandom()
     {
-        $item = Item::random()->first();
+        $item = $this->itemRepository->getRandom(1)->first();
         $result_item = [
             'id' => $item->id,
             'identifier' => $item->identifier,

@@ -50,7 +50,7 @@
     <div class="intro-body">
         <div class="container">
             <p class="lead tagline text-center">
-                {{ utrans('intro.definition_start') }} <strong><a href="/katalog">{!! formatNum(App\Item::amount()) !!}</a></strong> {{ trans('intro.definition_end') }}<br>
+                {{ utrans('intro.definition_start') }} <strong><a href="/katalog">{{ formatNum($itemCount) }}</a></strong> {{ trans('intro.definition_end') }}<br>
                 {!! App\Subtitle::random() !!}</p>
         </div>
     </div>

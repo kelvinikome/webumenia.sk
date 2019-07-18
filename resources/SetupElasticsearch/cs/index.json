@@ -7,39 +7,39 @@
           "min_gram": 2,
           "max_gram": 20
         },
-        "lemmagen_filter_cs": {
+        "lemmagen_filter": {
           "type": "lemmagen",
           "lexicon": "cs"
         },
-        "synonyms_filter_cs": {
+        "synonyms_filter": {
           "type": "synonym",
           "synonyms_path": "synonyms/synonyms_cz.txt"
         },
-        "stopwords_filter_cs": {
+        "stopwords_filter": {
           "type": "stop",
           "stopwords_path": "stop-words/stop-words-czech2.txt",
           "ignore_case": true
         }
       },
       "analyzer": {
-        "cestina_synonyms": {
+        "synonyms_analyzer": {
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "lemmagen_filter_cs",
+            "lemmagen_filter",
             "lowercase",
-            "synonyms_filter_cs",
-            "stopwords_filter_cs",
+            "synonyms_filter",
+            "stopwords_filter",
             "asciifolding"
           ]
         },
-        "cestina": {
+        "default_analyzer": {
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "lemmagen_filter_cs",
+            "lemmagen_filter",
             "lowercase",
-            "stopwords_filter_cs",
+            "stopwords_filter",
             "asciifolding"
           ]
         },

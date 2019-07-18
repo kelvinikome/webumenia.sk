@@ -7,40 +7,40 @@
           "min_gram": 2,
           "max_gram": 20
         },
-        "lemmagen_filter_sk": {
+        "lemmagen_filter": {
           "type": "lemmagen",
           "lexicon": "sk"
         },
-        "synonyms_filter_sk": {
+        "synonyms_filter": {
           "type": "synonym",
           "synonyms_path": "synonyms/sk_SK.txt",
           "ignore_case": true
         },
-        "stopwords_filter_sk": {
+        "stopwords_filter": {
           "type": "stop",
           "stopwords_path": "stop-words/stop-words-slovak.txt",
           "ignore_case": true
         }
       },
       "analyzer": {
-        "slovencina_synonyms": {
+        "synonyms_analyzer": {
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "lemmagen_filter_sk",
+            "lemmagen_filter",
             "lowercase",
-            "synonyms_filter_sk",
-            "stopwords_filter_sk",
+            "synonyms_filter",
+            "stopwords_filter",
             "asciifolding"
           ]
         },
-        "slovencina": {
+        "default_analyzer": {
           "type": "custom",
           "tokenizer": "standard",
           "filter": [
-            "lemmagen_filter_sk",
+            "lemmagen_filter",
             "lowercase",
-            "stopwords_filter_sk",
+            "stopwords_filter",
             "asciifolding"
           ]
         },

@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Cache;
 use Fadion\Bouncy\Facades\Elastic;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Input;
-use Fadion\Bouncy\BouncyTrait;
 use Illuminate\Database\Eloquent\Model;
 use Symfony\Component\Validator\Constraints\Valid;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
@@ -24,9 +23,7 @@ use Symfony\Component\Validator\Mapping\ClassMetadata;
 class Item extends Model
 {
     use \Conner\Tagging\Taggable;
-    use \Dimsav\Translatable\Translatable, BouncyTrait {
-        \Dimsav\Translatable\Translatable::save insteadof BouncyTrait;
-    }
+    use \Dimsav\Translatable\Translatable;
 
     const ARTWORKS_DIR = '/images/diela/';
     const ES_TYPE = '_doc';
@@ -872,7 +869,7 @@ class Item extends Model
 
             $client->index([
                 'index' => $elastic_translatable->getIndexForLocale($item_translated->locale),
-                'type' =>  self::ES_TYPE,
+//                'type' =>  self::ES_TYPE,
                 'id' => $this->id,
                 'body' => $data,
             ]);
@@ -973,4 +970,7 @@ class Item extends Model
     protected function getElasticClient() {
         return app(Client::class);
     }
+
+
+    // Bouncy methods
 }
