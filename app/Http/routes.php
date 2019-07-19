@@ -18,6 +18,7 @@ use App\Item;
 use App\Order;
 use App\Repositories\ItemRepository;
 use App\Slide;
+use App\Subtitle;
 
 Route::group(['domain' => 'media.webumenia.{tld}'], function () {
     Route::get('/', function ($tld) {
@@ -42,7 +43,7 @@ function()
         return redirect('kolekcia/25');
     });
 
-    Route::get('/', function (ItemRepository $itemRepository) {
+    Route::get('/', function (ItemRepository $itemRepository, Subtitle $subtitle) {
 
         $slides = Slide::published()->orderBy('id', 'desc')->get();
         $articles = Article::promoted()->published()->orderBy('published_date', 'desc')->get();
@@ -51,6 +52,7 @@ function()
             'slides' => $slides,
             'articles' => $articles,
             'itemCount' => $itemRepository->count(),
+            'subtitle' => $subtitle->random(),
         ]);
     });
 
@@ -289,9 +291,9 @@ function()
     // Route::match(array('GET', 'POST'), 'katalog', 'CatalogController@index');
     // Route::match(array('GET', 'POST'), 'katalog/suggestions', 'CatalogController@getSuggestions');
 
-    Route::match(array('GET', 'POST'), 'autori', 'AuthorController@getIndex');
-    Route::match(array('GET', 'POST'), 'autori/suggestions', 'AuthorController@getSuggestions');
-    Route::get('autor/{id}', 'AuthorController@getDetail');
+    Route::match(array('GET', 'POST'), 'autori', 'AuthorController@getIndex')->name('author.index');
+    Route::match(array('GET', 'POST'), 'autori/suggestions', 'AuthorController@getSuggestions')->name('author.suggestions');
+    Route::get('autor/{id}', 'AuthorController@getDetail')->name('author.detail');
 
     Route::match(array('GET', 'POST'), 'clanky', 'ClanokController@getIndex');
     Route::match(array('GET', 'POST'), 'clanky/suggestions', 'ClanokController@getSuggestions');
@@ -366,7 +368,7 @@ function()
             'items' => $items,
             'galleries' => $galleries,
         ]);
-    });
+    })->name('info');
 
     Route::get('reprodukcie', function () {
         $collection = Collection::find('55');

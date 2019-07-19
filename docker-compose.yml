@@ -58,8 +58,8 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
-    volumes:
-      - ./data/elasticsearch-${ES_INDEX}:/usr/share/elasticsearch/data
+    # volumes:
+      # - ./data/elasticsearch-${ES_INDEX}:/usr/share/elasticsearch/data
       # - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
       # - ./storage/logs/elasticsearch:/usr/share/elasticsearch/logs
   redis:

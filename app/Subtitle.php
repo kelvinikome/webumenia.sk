@@ -2,45 +2,37 @@
 
 namespace App;
 
+use App\Repositories\AuthorityRepository;
+use App\Repositories\ItemRepository;
+
 class Subtitle
 {
+    protected $itemRepository;
 
-    protected static $availavle_methods = array(
-            'fromGalleries',
-            'fromAuthors',
-            'inHightRes',
-            'areFree',
-            // 'fromWorkType'
-        );
+    protected $authorityRepository;
 
-    public static function fromGalleries()
-    {
-        return trans('intro.from_galleries_start').' <strong><a href="/informacie">'. formatNum(9) .'</a></strong> '.trans('intro.from_galleries_end');
+    public function __construct(
+        ItemRepository $itemRepository,
+        AuthorityRepository $authorityRepository
+    ) {
+        $this->itemRepository = $itemRepository;
+        $this->authorityRepository = $authorityRepository;
     }
 
-    public static function fromAuthors()
+    public function random()
     {
-        return trans('intro.from_authors_start').' <strong><a href="/autori">'. formatNum(Authority::amount()) .'</a></strong> '.trans('intro.from_authors_end');
-    }
+        $choices = [
+            ['intro.from_galleries_start', 'intro.from_galleries_end', route('info'), 9],
+            ['intro.from_galleries_start', 'intro.from_authors_end', route('author.index'), $this->authorityRepository->count()],
+            ['intro.in_high_res_start', 'intro.in_high_res_end', route('catalog.index', ['has_iip' => true]), $this->itemRepository->count(['has_iip' => true])],
+            ['intro.are_free_start', 'intro.are_free_end', route('catalog.index', ['is_free' => true]), $this->itemRepository->count(['is_free' => true])],
+        ];
 
-    public static function inHightRes()
-    {
-        return trans('intro.in_high_res_start').' <strong><a href="/katalog?has_iip=1">'. formatNum(Item::amount(['has_iip'=>true])) .'</a></strong> '.trans('intro.in_high_res_end');
-    }
+        $choice = $choices[array_rand($choices)];
+        $choice[0] = trans($choice[0]);
+        $choice[1] = trans($choice[1]);
+        $choice[3] = formatNum($choice[3]);
 
-    public static function areFree()
-    {
-        return trans('intro.are_free_start').' <strong><a href="/katalog?is_free=1">'. formatNum(Item::amount(['is_free'=>true])) .'</a></strong> '.trans('intro.are_free_end');
-    }
-
-    // public static function fromWorkType()
-    // {
-    // 	return 'z toho <strong>'. 10 .'</strong> grafík/kresieb/malieb...';
-    // }
-
-    public static function random()
-    {
-        $method = self::$availavle_methods[array_rand(self::$availavle_methods)];
-        return self::$method();
+        return vsprintf('%1$s <strong><a href="%3$s">%4$s</a></strong> %2$s', $choice);
     }
 }
